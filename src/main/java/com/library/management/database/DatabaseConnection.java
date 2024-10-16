@@ -9,9 +9,8 @@ public class DatabaseConnection {
     private Connection connection;
 
     public void connect() {
-        ConfigParser config = new ConfigParser("src/main/java/com/library/management/config/config.xml");
+        ConfigParser config = new ConfigParser();
         try{
-            String url = config.getDbUrl() + "user:" + config.getDbUser();
             connection = DriverManager.getConnection(config.getDbUrl(), config.getDbUser(), config.getDbPass());
         } catch (SQLException e) {
             System.err.println(e.getMessage());

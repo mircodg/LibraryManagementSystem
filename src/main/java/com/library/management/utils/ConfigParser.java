@@ -15,9 +15,9 @@ public class ConfigParser {
     private String dbPass;
     private int serverPort;
 
-    public ConfigParser(String filePath){
+    public ConfigParser(){
         try {
-            File file = new File(filePath);
+            File file = new File("src/main/java/com/library/management/config/config.xml");
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
