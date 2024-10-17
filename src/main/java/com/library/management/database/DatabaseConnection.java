@@ -6,18 +6,11 @@ import java.sql.SQLException;
 import com.library.management.utils.ConfigParser;
 
 public class DatabaseConnection {
-    private Connection connection;
+    private Connection conn;
 
-    public void connect() {
+    public void connect() throws  SQLException {
         ConfigParser config = new ConfigParser();
-        try{
-            connection = DriverManager.getConnection(config.getDbUrl(), config.getDbUser(), config.getDbPass());
-        } catch (SQLException e) {
-            System.err.println(e.getMessage());
-        }
+        conn = DriverManager.getConnection(config.getDbUrl(), config.getDbUser(), config.getDbPass());
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
 }
