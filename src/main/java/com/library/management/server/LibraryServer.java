@@ -10,20 +10,26 @@ import java.net.Socket;
 import java.sql.SQLException;
 
 public class LibraryServer{
-    private final ServerSocket serverSocket;
-    private final DatabaseConnection databaseConnection;
+    private ServerSocket serverSocket;
+    private DatabaseConnection databaseConnection;
 
 
 
     public LibraryServer() {
         ConfigParser configParser = new ConfigParser();
-        this.databaseConnection = new DatabaseConnection();
-        this.serverSocket = new ServerSocket();
+        try {
+            this.serverSocket = new ServerSocket(configParser.getServerPort());
+            System.out.println("[SERVER] port allocated");
+        }catch(IOException e){
+            System.err.println("[SERVER] could not use port: " + configParser.getServerPort());
+        }
     }
 
     public void start() {
         ClientHandler clientHandler;
         try {
+            this.databaseConnection = new DatabaseConnection();
+            System.out.println("[SERVER] connected to database ");
             System.out.println("[SERVER] listening on port " + serverSocket.getLocalPort());
             while(!this.serverSocket.isClosed()) {
                 // listening for clients
@@ -36,6 +42,9 @@ public class LibraryServer{
             System.err.println("[SERVER] could not accept connection");
             this.stop();
             throw new RuntimeException(e.getMessage());
+        }catch (SQLException e) {
+            System.err.println("[SERVER] could not connect to database");
+            this.stop();
         }
     }
 
@@ -44,8 +53,9 @@ public class LibraryServer{
             // close server socket
             if(this.serverSocket != null) {
                 this.serverSocket.close();
+                System.out.println("[SERVER] server socket closed");
             }
-            System.out.println("[SERVER] server socket closed");
+            System.out.println("[SERVER] exiting");
         } catch (IOException e) {
             throw new RuntimeException(e.getMessage());
         }
