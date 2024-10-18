@@ -17,4 +17,8 @@ public class DatabaseConnection {
         conn = DriverManager.getConnection(config.getDbUrl(), config.getDbUser(), config.getDbPass());
     }
 
+    public void disconnect() throws SQLException {
+        conn.close();
+    }
+
 }
