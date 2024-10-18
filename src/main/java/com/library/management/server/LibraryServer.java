@@ -8,11 +8,12 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class LibraryServer{
     private ServerSocket serverSocket;
     private DatabaseConnection databaseConnection;
-
+    private ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
 
 
     public LibraryServer() {
@@ -34,8 +35,10 @@ public class LibraryServer{
             while(!this.serverSocket.isClosed()) {
                 // listening for clients
                 Socket clientSocket = serverSocket.accept();
+                System.out.println("[SERVER] new client connected");
                 // starting a new thread
                 clientHandler = new ClientHandler(clientSocket);
+                this.clientHandlers.add(clientHandler);
                 clientHandler.start();
             }
         } catch (IOException e) {
@@ -50,8 +53,12 @@ public class LibraryServer{
 
     public void stop() {
         try {
-            // close server socket
             if(this.serverSocket != null) {
+                // closing every client socket
+                for(ClientHandler clientHandler : this.clientHandlers) {
+                    clientHandler.closeAll();
+                }
+                // closing server socket
                 this.serverSocket.close();
                 System.out.println("[SERVER] server socket closed");
             }

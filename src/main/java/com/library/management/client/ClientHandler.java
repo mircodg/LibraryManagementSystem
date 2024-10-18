@@ -2,7 +2,7 @@ package com.library.management.client;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
+
 
 public class ClientHandler extends Thread {
     private final Socket socket;
@@ -17,11 +17,39 @@ public class ClientHandler extends Thread {
             this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
         } catch (IOException e) {
             System.err.println("[SERVER] error while allocating socket for the client: " + e);
+            this.closeAll();
+        }
+    }
+
+    public void closeAll(){
+        try{
+            if(socket != null && in != null && out != null){
+                socket.close();
+                in.close();
+                out.close();
+                System.out.println("[SERVER] client socket closed");
+            }
+        } catch (IOException e) {
+            System.err.println("[SERVER] error while closing the socket for the client: " + e);
+        }
+    }
+
+    public void listen(){
+        try {
+            String request;
+            while (!(request = in.readLine()).equals("[CLIENT] /exit")) {
+                System.out.println(request);
+            }
+            System.out.println("[SERVER] client socket closed");
+            this.closeAll();
+        } catch (IOException e) {
+            System.err.println("[SERVER] error while reading socket for the client: " + e);
+            this.closeAll();
         }
     }
 
     @Override
     public void run() {
-
+        this.listen();
     }
 }
