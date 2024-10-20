@@ -20,11 +20,11 @@ public class BookRepository {
 
     public Book getBookByID(int bookID) {
         try{
-            String query = "SELECT * FROM books WHERE id = ?" ;
+            String query = "SELECT * FROM books WHERE bookID = ?" ;
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, bookID);
             ResultSet rs = statement.executeQuery();
-            return new Book(rs.getInt("id"), rs.getString("title"), rs.getString("author"), rs.getString("description"), rs.getString("publisher"), rs.getDate("publishedDate"));
+            return new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("author"), rs.getString("description"), rs.getString("publisher"), rs.getDate("publishedDate"));
         }catch(SQLException e){
             System.err.println("error while retrieving book: " + e.getMessage());
             return null;
@@ -33,7 +33,7 @@ public class BookRepository {
 
     public boolean addBook(Book book) {
         try{
-            String query = "INSERT INTO books (id, title, description, author, publisher, publishedDate) VALUES (?, ?, ?, ?, ?, ?))";
+            String query = "INSERT INTO books (bookID, title, description, author, publisher, publishedDate) VALUES (?, ?, ?, ?, ?, ?))";
             PreparedStatement statement = connection.prepareStatement(query);
             return statement.execute();
         }catch(SQLException e){
@@ -49,7 +49,7 @@ public class BookRepository {
             ResultSet rs = statement.executeQuery();
             List<Book> books = new ArrayList<>();
             while(rs.next()){
-                books.add(new Book(rs.getInt("id"), rs.getString("title"), rs.getString("description"), rs.getString("author"), rs.getString("publisher"), rs.getDate("publishedDate") ));
+                books.add(new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("description"), rs.getString("author"), rs.getString("publisher"), rs.getDate("publishedDate") ));
             }
             return books;
         }catch(SQLException e){
@@ -78,7 +78,7 @@ public class BookRepository {
 
     public boolean deleteBook(int bookID) {
         try{
-            String query = "DELETE FROM books WHERE id = ?";
+            String query = "DELETE FROM books WHERE bookID = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, bookID);
             return statement.execute();

@@ -1,4 +1,5 @@
 package com.library.management.client;
+import com.library.management.utils.Utils;
 
 import java.io.*;
 import java.net.Socket;
@@ -43,7 +44,7 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         while(socket.isConnected()){
             String messageToSend = scanner.nextLine();
-            out.println("[CLIENT] " + messageToSend);
+            out.println(messageToSend);
             if(messageToSend.equals("/exit")){
                 this.closeAll();
                 System.out.println("[CLIENT] closed socket and exiting");
@@ -57,16 +58,21 @@ public class Client {
             public void run() {
                 while(running){
                     try{
-                        String receivedMessage = in.readLine();
-                        if(receivedMessage == null){
+                        String receivedMessage;
+                        if((receivedMessage = in.readLine()) == null){
                             running = false;
                             System.out.println("[SERVER] shutting down");
                             System.exit(0);
                         }else{
-                            System.out.println("[SERVER] " + receivedMessage);
+                            if(receivedMessage.equals("/clear")){
+                                Utils.clearScreen();
+                            }
+                            else{
+                                System.out.println(receivedMessage);
+                            }
                         }
                     } catch (IOException e) {
-                        System.err.println("[SERVER] error while reading from socket");
+                        System.err.println("[SERVER] error while reading from socket: " + e.getMessage());
                     }
                 }
             }

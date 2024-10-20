@@ -1,6 +1,6 @@
 package com.library.management.database;
 
-import com.library.management.User;
+import com.library.management.users.User;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,8 +22,25 @@ public class UserRepository {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, userID);
             ResultSet rs = preparedStatement.executeQuery();
-            return new User(rs.getInt("id"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"));
+            return new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
         }catch (SQLException e){
+            System.err.println("error while retrieving user: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public User getUserByCredentials(String username, String password){
+        try{
+            String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, username);
+            statement.setString(2, password);
+            ResultSet rs = statement.executeQuery();
+            if(!rs.next()){
+                return null;
+            }
+            return new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
+        } catch (SQLException e) {
             System.err.println("error while retrieving user: " + e.getMessage());
             return null;
         }
@@ -36,7 +53,7 @@ public class UserRepository {
             ResultSet rs = preparedStatement.executeQuery();
             List<User> users = new ArrayList<>();
             while(rs.next()){
-                users.add(new User(rs.getInt("id"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password")));
+                users.add(new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role")));
             }
             return users;
         }catch(SQLException e){
@@ -55,6 +72,19 @@ public class UserRepository {
             preparedStatement.setString(4, user.getPassword());
             return preparedStatement.execute();
         } catch (SQLException e) {
+            System.err.println("error while adding user: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean addUser(String username, String password){
+        try{
+            String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            return preparedStatement.execute();
+        }catch (SQLException e){
             System.err.println("error while adding user: " + e.getMessage());
             return false;
         }

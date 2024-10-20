@@ -1,20 +1,27 @@
 package com.library.management.client;
 
+import com.library.management.database.DatabaseConnection;
+import com.library.management.menu.ClientMenu;
+
 import java.io.*;
 import java.net.Socket;
+import java.sql.Connection;
 
 
 public class ClientHandler extends Thread {
     private final Socket socket;
     private BufferedReader in;
     private PrintWriter out;
+    Connection connection; // shared db connection. May use a thread pool
+    // so that we have multiple connections open only when necessary.
 
 
-    public ClientHandler(Socket socket) {
+    public ClientHandler(Socket socket, Connection connection) {
         this.socket = socket;
         try {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
+            this.connection = connection;
         } catch (IOException e) {
             System.err.println("[SERVER] error while allocating socket for the client: " + e);
             this.closeAll();
@@ -37,7 +44,7 @@ public class ClientHandler extends Thread {
     public void listen(){
         try {
             String request;
-            while (!(request = in.readLine()).equals("[CLIENT] /exit")) {
+            while (!(request = in.readLine()).equals("[CLIENT] /exit") || ((request = in.readLine()) != null)) {
                 System.out.println(request);
             }
             System.out.println("[SERVER] client socket closed");
@@ -50,6 +57,16 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-        this.listen();
+//      this.listen();
+        // thread that handles menu. This way the server listen and sends data concurrently.
+        System.out.println("[SERVER] client thread started. Displaying Menu");
+        ClientMenu menu = new ClientMenu(this.socket, this.connection);
+        try {
+            menu.displayMenu();
+        } catch (IOException e) {
+            System.err.println("[SERVER] error while displaying menu for the client: " + e.getMessage());
+            this.closeAll();
+            throw new RuntimeException(e);
+        }
     }
 }

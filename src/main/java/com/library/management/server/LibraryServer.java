@@ -7,13 +7,14 @@ import com.library.management.utils.ConfigParser;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class LibraryServer{
     private ServerSocket serverSocket;
-    private DatabaseConnection databaseConnection;
-    private ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
+    private Connection connection;
+    private final ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
 
 
     public LibraryServer() {
@@ -29,7 +30,8 @@ public class LibraryServer{
     public void start() {
         ClientHandler clientHandler;
         try {
-            this.databaseConnection = new DatabaseConnection();
+            DatabaseConnection databaseConnection = new DatabaseConnection();
+            this.connection = databaseConnection.getConnection();
             System.out.println("[SERVER] connected to database ");
             System.out.println("[SERVER] listening on port " + serverSocket.getLocalPort());
             while(!this.serverSocket.isClosed()) {
@@ -37,7 +39,8 @@ public class LibraryServer{
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("[SERVER] new client connected");
                 // starting a new thread
-                clientHandler = new ClientHandler(clientSocket);
+//                clientHandler = new ClientHandler(clientSocket, this.databaseConnection);
+                clientHandler = new ClientHandler(clientSocket, connection);
                 this.clientHandlers.add(clientHandler);
                 clientHandler.start();
             }
@@ -60,12 +63,16 @@ public class LibraryServer{
                 }
                 // closing server socket
                 this.serverSocket.close();
-                System.out.println("[SERVER] server socket closed");
+//                this.databaseConnection.disconnect();
+                System.out.println("[SERVER] server socket and db connection closed");
             }
             System.out.println("[SERVER] exiting");
         } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
+            System.err.println("[SERVER] could not close server socket");
         }
+//        catch (SQLException e) {
+//            System.err.println("[SERVER] error closing connection with database");
+//        }
     }
 
 }
