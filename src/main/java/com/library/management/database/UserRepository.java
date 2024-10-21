@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserRepository {
     private final Connection connection;
@@ -22,7 +22,12 @@ public class UserRepository {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setInt(1, userID);
             ResultSet rs = preparedStatement.executeQuery();
-            return new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
+            if(rs.next()){
+                return new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
+            }else{
+                System.err.println("User not found");
+                return null;
+            }
         }catch (SQLException e){
             System.err.println("error while retrieving user: " + e.getMessage());
             return null;
@@ -31,12 +36,12 @@ public class UserRepository {
 
     public User getUserByCredentials(String username, String password){
         try{
-            String query = "SELECT * FROM users WHERE username = ? AND password = ?";
+            String query = "SELECT * FROM users WHERE username = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, username);
-            statement.setString(2, password);
             ResultSet rs = statement.executeQuery();
-            if(!rs.next()){
+            if(!rs.next() || !BCrypt.checkpw(password, rs.getString("password"))){
+                System.err.println("User not found");
                 return null;
             }
             return new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
@@ -69,8 +74,8 @@ public class UserRepository {
             preparedStatement.setString(1, user.getFirstName());
             preparedStatement.setString(2, user.getLastName());
             preparedStatement.setString(3, user.getUsername());
-            preparedStatement.setString(4, user.getPassword());
-            return preparedStatement.execute();
+            preparedStatement.setString(4, BCrypt.hashpw(user.getPassword(), BCrypt.gensalt()));
+            return preparedStatement.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("error while adding user: " + e.getMessage());
             return false;
@@ -79,35 +84,73 @@ public class UserRepository {
 
     public boolean addUser(String username, String password){
         try{
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
             String sql = "INSERT INTO users (username, password) VALUES (?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, username);
-            preparedStatement.setString(2, password);
-            return preparedStatement.execute();
+            preparedStatement.setString(2, hashedPassword);
+            return preparedStatement.executeUpdate() > 0;
         }catch (SQLException e){
             System.err.println("error while adding user: " + e.getMessage());
             return false;
         }
     }
 
-    public boolean updateUser(int userID, String firstName, String lastName, String username, String password) {
-        User newUser = getUser(userID);
-        if(newUser == null){
+    public boolean updateUserFirstName(User user,String firstName){
+        try{
+            String query = "UPDATE users SET firstName = ? WHERE userID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setInt(2, user.getUserID());
+            return preparedStatement.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.err.println("error while updating user name: " + e.getMessage());
             return false;
         }
-        if(firstName != null){
-            newUser.setFirstName(firstName);
+    }
+
+
+    public boolean updateUserLastName(User user, String lastName){
+        try{
+            String query = "UPDATE users SET lastName = ? WHERE userID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, lastName);
+            preparedStatement.setInt(2, user.getUserID());
+            return preparedStatement.execute();
+        }catch (SQLException e){
+            System.err.println("error while updating user last name: " + e.getMessage());
+            return false;
         }
-        if(lastName != null){
-            newUser.setLastName(lastName);
+    }
+
+    public boolean updateUser(User user, String firstName, String lastName){
+        try{
+            String query = "UPDATE users SET firstName = ?, lastName = ? WHERE userID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setInt(3, user.getUserID());
+            return preparedStatement.execute();
+        }catch(SQLException e){
+            System.err.println("error while updating user: " + e.getMessage());
+            return false;
         }
-        if(username != null){
-            newUser.setUsername(username);
+    }
+
+    public boolean updateUser(User user, String firstName, String lastName, String password) {
+        try{
+            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+            String query = "UPDATE users SET firstName = ?, lastName = ?, password = ? WHERE userID = ?";
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setString(1, firstName);
+            preparedStatement.setString(2, lastName);
+            preparedStatement.setString(3, hashedPassword);
+            preparedStatement.setInt(4, user.getUserID());
+            return preparedStatement.executeUpdate() > 0;
+        }catch (SQLException e){
+            System.err.println("error while updating user: " + e.getMessage());
+            return false;
         }
-        if(password != null){
-            newUser.setPassword(password);
-        }
-        return addUser(newUser);
     }
 
     public boolean deleteUser(int userID){
@@ -122,4 +165,7 @@ public class UserRepository {
         }
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
 }

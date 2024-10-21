@@ -17,7 +17,7 @@ public class ClientMenu {
     public ClientMenu(Socket socket, Connection connection) {
         this.socket = socket;
         this.userRepository = new UserRepository(connection);
-        try{
+        try {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
         } catch (IOException e) {
@@ -25,15 +25,15 @@ public class ClientMenu {
         }
     }
 
-    public ClientMenu(Socket socket) {
-        this.socket = socket;
-        try{
-            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-        } catch (IOException e) {
-            System.err.println("error while creating ClientMenu: " + e.getMessage());
-        }
-    }
+//    public ClientMenu(Socket socket) {
+//        this.socket = socket;
+//        try {
+//            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//            this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
+//        } catch (IOException e) {
+//            System.err.println("error while creating ClientMenu: " + e.getMessage());
+//        }
+//    }
 
     // registration and login menu
     public void displayMenu() throws IOException {
@@ -41,15 +41,15 @@ public class ClientMenu {
         out.println("=== Welcome to the Library === ");
         out.println("1. Login");
         out.println("2. Register");
+
         while (loop) {
-            String choice = in.readLine();
-            System.out.println("[SERVER] choice: " + choice);
-            switch(choice) {
-                case "1":
+            int choice = Integer.parseInt(in.readLine());
+            switch (choice) {
+                case 1:
                     login();
                     loop = false;
                     break;
-                case "2":
+                case 2:
                     register();
                     loop = false;
                     break;
@@ -67,11 +67,15 @@ public class ClientMenu {
         User user = userRepository.getUserByCredentials(username, password);
         if (user != null) {
             out.println("Successfully logged in");
-            if(user.getRole().equals("admin")){
+            if (user.getRole().equals("admin")) {
                 // AdminMenu.displayMenu
-            }else{
-                UserMenu myUserMenu = new UserMenu(this.socket, user);
+            } else {
+                UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), user);
+                myUserMenu.displayMenu();
             }
+        } else {
+            out.println("Invalid username or password");
+            displayMenu();
         }
     }
 
@@ -81,17 +85,17 @@ public class ClientMenu {
         out.println("Enter password: ");
         String password = in.readLine();
         User user = userRepository.getUserByCredentials(username, password);
+        System.out.println(user);
+        // if username is valid (not used)
         if (user == null) {
             userRepository.addUser(username, password);
             // no admin can be register so redirect to user menu
             out.println("Successfully registered");
-            out.println("/clear");
             // retrieve user
             User newUser = userRepository.getUserByCredentials(username, password);
-            UserMenu myUserMenu = new UserMenu(this.socket, newUser);
+            UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), newUser);
             myUserMenu.displayMenu();
-        }
-        else{
+        } else {
             out.println("User already exists");
             out.println("/clear");
         }
