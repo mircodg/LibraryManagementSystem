@@ -1,18 +1,17 @@
 package com.library.management.books;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class Book {
-
-    private int bookID;
+    private int id = 0;
     private String title;
     private String author;
     private String description;
     private String publisher;
-    private Date publishedDate;
+    private String publishedDate;
 
-    public Book(int bookID, String title, String author, String description, String publisher, Date publishedDate) {
-        this.bookID = bookID;
+    public Book(int id, String title, String author, String description, String publisher, String publishedDate) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.description = description;
@@ -20,12 +19,14 @@ public class Book {
         this.publishedDate = publishedDate;
     }
 
-    public int getBookID() {
-        return bookID;
+    public Book(String title, String author, String description, String publisher, String publishedDate) {
+        this.title = title;
+        this.author = author;
+        this.description = description;
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
     }
-    public void setBookID(int bookID) {
-        this.bookID = bookID;
-    }
+
     public String getTitle() {
         return title;
     }
@@ -33,27 +34,41 @@ public class Book {
         this.title = title;
     }
     public String getAuthor() {
-        return author;
+        if (this.author != null)
+            return author;
+        return null;
     }
     public void setAuthor(String author) {
         this.author = author;
     }
     public String getDescription() {
-        return description;
+        if (this.description != null)
+            return description;
+        return null;
     }
     public void setDescription(String description) {
         this.description = description;
     }
     public String getPublisher() {
-        return publisher;
+        if (this.publisher != null)
+            return publisher;
+        return null;
     }
     public void setPublisher(String publisher) {
         this.publisher = publisher;
     }
-    public Date getPublishedDate() {
-        return publishedDate;
+    public String getPublishedDate() {
+        if (this.publishedDate != null)
+            return publishedDate;
+        return null;
     }
-    public void setPublishedDate(Date publishedDate) {
+    public void setPublishedDate(String publishedDate) {
         this.publishedDate = publishedDate;
+    }
+    public Date stringToDate(String publishedDate){
+        return Date.valueOf(publishedDate);
+    }
+    public int getId() {
+        return id;
     }
 }
