@@ -27,29 +27,26 @@ public class ClientMenu {
 
     // registration and login menu
     public void displayMenu() throws IOException {
-        boolean loop = true;
         out.println("=== Welcome to the Library === ");
         out.println("1. Login");
         out.println("2. Register");
 
-        while (loop) {
-            int choice = Integer.parseInt(in.readLine());
-            switch (choice) {
-                case 1:
-                    login();
-                    loop = false;
-                    break;
-                case 2:
-                    register();
-                    loop = false;
-                    break;
-                default:
-                    out.println("Invalid choice");
-            }
+        int choice = Integer.parseInt(in.readLine());
+        switch (choice) {
+            case 1:
+                login();
+                break;
+            case 2:
+                register();
+                break;
+            default:
+                out.println("Invalid choice");
+                displayMenu();
         }
+
     }
 
-    public void login() throws IOException {
+    private void login() throws IOException {
         out.println("Enter username: ");
         String username = in.readLine();
         out.println("Enter password: ");
@@ -70,7 +67,7 @@ public class ClientMenu {
         }
     }
 
-    public void register() throws IOException {
+    private void register() throws IOException {
         out.println("Enter username: ");
         String username = in.readLine();
         out.println("Enter password: ");
