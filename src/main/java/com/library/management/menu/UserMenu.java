@@ -28,8 +28,9 @@ public class UserMenu extends ClientMenu{
                 String lastName = in.readLine();
                 boolean response = userRepository.updateUser(myUser, firstName, lastName);
                 if(response){
+                    this.myUser = userRepository.getUserByCredentials(this.myUser.getUsername(), this.myUser.getPassword());
                     out.println("Thank you, you're information have been saved");
-                    out.println("/clear");
+//                    out.println("/clear");
                     userActions();
                 }
             }catch(IOException e){
@@ -44,7 +45,8 @@ public class UserMenu extends ClientMenu{
 
     private void userActions(){
         out.println(myUser.getFirstName().toUpperCase() + "'s Library");
-        out.print("1. See rented books\n2. Rent a book\n3. Return a book\n4. Exit\nChoice: ");
+        out.println("1. See rented books\n2. Rent a book\n3. Return a book\n4. Exit\nChoice: ");
+        out.flush(); // this because out.print() don't get automatically flushed.
         boolean loop = true;
         try{
             while (loop){
@@ -78,7 +80,6 @@ public class UserMenu extends ClientMenu{
     private void rentBookMenu(){}
     private void returnBookMenu(){}
 
-
-
+    // TODO: exit logic
 
 }
