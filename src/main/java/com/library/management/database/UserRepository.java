@@ -130,7 +130,7 @@ public class UserRepository {
             preparedStatement.setString(1, firstName);
             preparedStatement.setString(2, lastName);
             preparedStatement.setInt(3, user.getUserID());
-            return preparedStatement.execute();
+            return preparedStatement.executeUpdate() > 0;
         }catch(SQLException e){
             System.err.println("error while updating user: " + e.getMessage());
             return false;
