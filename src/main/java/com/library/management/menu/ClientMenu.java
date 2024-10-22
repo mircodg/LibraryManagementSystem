@@ -25,16 +25,6 @@ public class ClientMenu {
         }
     }
 
-//    public ClientMenu(Socket socket) {
-//        this.socket = socket;
-//        try {
-//            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
-//        } catch (IOException e) {
-//            System.err.println("error while creating ClientMenu: " + e.getMessage());
-//        }
-//    }
-
     // registration and login menu
     public void displayMenu() throws IOException {
         boolean loop = true;
@@ -68,7 +58,8 @@ public class ClientMenu {
         if (user != null) {
             out.println("Successfully logged in");
             if (user.getRole().equals("admin")) {
-                // AdminMenu.displayMenu
+                AdminMenu myAdminMenu = new AdminMenu(user, this.socket, userRepository.getConnection());
+                myAdminMenu.displayMenu();
             } else {
                 UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), user);
                 myUserMenu.displayMenu();
