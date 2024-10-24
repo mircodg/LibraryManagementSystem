@@ -19,24 +19,6 @@ public class BookRepository {
         this.connection = connection;
     }
 
-    public Book getBookByID(int bookID) {
-        try {
-            String query = "SELECT * FROM books WHERE bookID = ?";
-            PreparedStatement statement = connection.prepareStatement(query);
-            statement.setInt(1, bookID);
-            ResultSet rs = statement.executeQuery();
-            if (rs.next()) {
-                Date date = rs.getDate("publishedDate");
-                String dateAsString = date.toString();
-                return new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("author"), rs.getString("description"), rs.getString("publisher"), dateAsString);
-            } else {
-                return null;
-            }
-        } catch (SQLException e) {
-            System.err.println("error while retrieving book: " + e.getMessage());
-            return null;
-        }
-    }
 
     public boolean addBook(Book book) throws IllegalArgumentException{
         try {
@@ -63,7 +45,7 @@ public class BookRepository {
             while (rs.next()) {
                 Date date = rs.getDate("publishedDate");
                 String dateAsString = date.toString();
-                books.add(new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("description"), rs.getString("author"), rs.getString("publisher"), dateAsString));
+                books.add(new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("description"), rs.getString("author"), rs.getString("publisher"), dateAsString, rs.getInt("userID")));
             }
             return books;
         } catch (SQLException e) {
@@ -90,7 +72,7 @@ public class BookRepository {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, title);
             ResultSet rs = statement.executeQuery();
-            return returnBookFromQuery(rs);
+            return getBookFromQuery(rs);
         } catch (SQLException e) {
             System.err.println("error while searching a book: " + e.getMessage());
             return null;
@@ -103,19 +85,9 @@ public class BookRepository {
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setInt(1, bookID);
             ResultSet rs = statement.executeQuery();
-            return returnBookFromQuery(rs);
+            return getBookFromQuery(rs);
         }catch(SQLException e){
             System.err.println("error while searching a book: " + e.getMessage());
-            return null;
-        }
-    }
-
-    private Book returnBookFromQuery(ResultSet rs) throws SQLException {
-        if (rs.next()) {
-            Date date = rs.getDate("publishedDate");
-            String dateAsString = date.toString();
-            return new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("author"), rs.getString("description"), rs.getString("publisher"), dateAsString);
-        }else{
             return null;
         }
     }
@@ -127,14 +99,28 @@ public class BookRepository {
             statement.setInt(1, userID);
             ResultSet rs = statement.executeQuery();
             List<Book> books = new ArrayList<>();
-            while (rs.next()) {
-                books.add(returnBookFromQuery(rs));
-            }
-            return books;
+            return getBooksFromQuery(rs, books);
         }catch(SQLException e){
             System.err.println("error while getting user books: " + e.getMessage());
             return null;
         }
+    }
+
+    private Book getBookFromQuery(ResultSet rs) throws SQLException {
+        if(rs.next()) {
+            Date date = rs.getDate("publishedDate");
+            String dateAsString = date.toString();
+            return new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("author"), rs.getString("description"), rs.getString("publisher"), dateAsString, rs.getInt("userID"));
+        }return null;
+    }
+
+    private List<Book> getBooksFromQuery(ResultSet rs, List<Book> books) throws SQLException {
+        while (rs.next()) {
+            Date date = rs.getDate("publishedDate");
+            String dateAsString = date.toString();
+            books.add(new Book(rs.getInt("bookID"), rs.getString("title"), rs.getString("author"), rs.getString("description"), rs.getString("publisher"), dateAsString, rs.getInt("userID") ));
+        }
+        return books;
     }
 
     public boolean returnBook(int userID, int bookID){
@@ -156,10 +142,7 @@ public class BookRepository {
             String query = "SELECT * FROM books WHERE userID IS NULL";
             PreparedStatement statement = connection.prepareStatement(query);
             ResultSet rs = statement.executeQuery();
-            while (rs.next()) {
-                books.add(returnBookFromQuery(rs));
-            }
-            return books;
+            return getBooksFromQuery(rs, books);
         } catch (SQLException e) {
             System.err.println("error while getting available books: " + e.getMessage());
             return null;
@@ -169,17 +152,19 @@ public class BookRepository {
     public boolean rentBook(int bookID, int userID){
         try{
             Book book = getBookById(bookID);
-            if(book != null && book.getUserID() == userID){
+            // if the book exist, and it's not rented by any user
+            if(book != null  && book.getUserID() == 0){
+                System.out.println("trying to rent book");
                 String query = "UPDATE books SET userID = ? WHERE bookID = ?";
                 PreparedStatement statement = connection.prepareStatement(query);
-                statement.setInt(1, bookID);
-                statement.setInt(2, userID);
+                statement.setInt(1, userID);
+                statement.setInt(2, bookID);
                 return statement.executeUpdate() > 0;
             }else{
                 return false;
             }
         }catch(SQLException e){
-            System.err.println("error while returning book: " + e.getMessage());
+            System.err.println("error while renting book: " + e.getMessage());
             return false;
         }
     }
