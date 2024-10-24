@@ -9,6 +9,7 @@ public class Book {
     private String description;
     private String publisher;
     private String publishedDate;
+    private Integer userID;
 
     public Book(int id, String title, String author, String description, String publisher, String publishedDate) {
         this.id = id;
@@ -33,6 +34,7 @@ public class Book {
     public void setTitle(String title) {
         this.title = title;
     }
+
     public String getAuthor() {
         if (this.author != null)
             return author;
@@ -65,10 +67,16 @@ public class Book {
     public void setPublishedDate(String publishedDate) {
         this.publishedDate = publishedDate;
     }
-    public Date stringToDate(String publishedDate){
+    public Date stringToDate(String publishedDate) throws IllegalArgumentException{
         return Date.valueOf(publishedDate);
     }
     public int getId() {
         return id;
+    }
+    public void setUserID(int id) {
+        this.userID = id;
+    }
+    public int getUserID() {
+        return userID;
     }
 }
