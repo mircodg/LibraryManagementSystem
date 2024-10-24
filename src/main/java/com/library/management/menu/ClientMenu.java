@@ -1,5 +1,6 @@
 package com.library.management.menu;
 
+import com.library.management.database.BookRepository;
 import com.library.management.database.UserRepository;
 import com.library.management.users.User;
 
@@ -13,10 +14,12 @@ public class ClientMenu {
     protected BufferedReader in;
     protected PrintWriter out;
     protected UserRepository userRepository;
+    protected BookRepository bookRepository;
 
     public ClientMenu(Socket socket, Connection connection) {
         this.socket = socket;
         this.userRepository = new UserRepository(connection);
+        this.bookRepository = new BookRepository(connection);
         try {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()), true);
@@ -31,12 +34,12 @@ public class ClientMenu {
         out.println("1. Login");
         out.println("2. Register");
 
-        int choice = Integer.parseInt(in.readLine());
+        String choice = in.readLine();
         switch (choice) {
-            case 1:
+            case "1":
                 login();
                 break;
-            case 2:
+            case "2":
                 register();
                 break;
             default:
@@ -55,10 +58,10 @@ public class ClientMenu {
         if (user != null) {
             out.println("Successfully logged in");
             if (user.getRole().equals("admin")) {
-                AdminMenu myAdminMenu = new AdminMenu(user, this.socket, userRepository.getConnection());
+                AdminMenu myAdminMenu = new AdminMenu(this.socket, userRepository.getConnection());
                 myAdminMenu.displayMenu();
             } else {
-                UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), user);
+                UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), username, password);
                 myUserMenu.displayMenu();
             }
         } else {
@@ -72,19 +75,29 @@ public class ClientMenu {
         String username = in.readLine();
         out.println("Enter password: ");
         String password = in.readLine();
-        User user = userRepository.getUserByCredentials(username, password);
-        System.out.println(user);
+        boolean isUsernameValid = userRepository.isUsernameValid(username);
         // if username is valid (not used)
-        if (user == null) {
-            userRepository.addUser(username, password);
-            // no admin can be register so redirect to user menu
-            out.println("Successfully registered");
-            // retrieve user
-            User newUser = userRepository.getUserByCredentials(username, password);
-            UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), newUser);
-            myUserMenu.displayMenu();
+        if (isUsernameValid) {
+            boolean response = userRepository.addUser(username, password);
+            if(response){
+                // no admin can be register so redirect to user menu
+                out.println("Successfully registered");
+                // retrieve user
+                User newUser = userRepository.getUserByCredentials(username, password);
+                UserMenu myUserMenu = new UserMenu(this.socket, userRepository.getConnection(), username, password);
+                myUserMenu.displayMenu();
+            }else {
+                out.println("error while registering user");
+                out.println("enter anything to go back to the menu");
+                in.readLine();
+                displayMenu();
+            }
+
         } else {
-            out.println("User already exists");
+            out.println("username already taken by another user");
+            out.println("enter anything to go back to the menu");
+            displayMenu();
+            in.readLine();
             out.println("/clear");
         }
     }
