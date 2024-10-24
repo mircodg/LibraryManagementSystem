@@ -9,7 +9,7 @@ public class Book {
     private String description;
     private String publisher;
     private String publishedDate;
-    private Integer userID;
+    private int userID;
 
     public Book(int id, String title, String author, String description, String publisher, String publishedDate) {
         this.id = id;
@@ -18,7 +18,18 @@ public class Book {
         this.description = description;
         this.publisher = publisher;
         this.publishedDate = publishedDate;
+        this.userID = 0; // 0 as default value since we can't have an id=0
     }
+    public Book(int id, String title, String author, String description, String publisher, String publishedDate, int userID) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.description = description;
+        this.publisher = publisher;
+        this.publishedDate = publishedDate;
+        this.userID = 0; // 0 as default value since we can't have an id=0
+    }
+
 
     public Book(String title, String author, String description, String publisher, String publishedDate) {
         this.title = title;
@@ -26,6 +37,7 @@ public class Book {
         this.description = description;
         this.publisher = publisher;
         this.publishedDate = publishedDate;
+        this.userID = 0; // set as default value
     }
 
     public String getTitle() {
