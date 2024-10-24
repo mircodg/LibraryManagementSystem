@@ -96,13 +96,13 @@ public class UserMenu extends ClientMenu {
 
     private void rentBookMenu() {
         List<Book> bookToRent = bookRepository.getAvailableBooks();
-        try{
-            if(bookToRent.isEmpty()) {
+        try {
+            if (bookToRent.isEmpty()) {
                 out.println("No books to rent");
                 out.println("Enter anything to go back to your library");
                 in.readLine();
                 userActions();
-            }else{
+            } else {
                 out.println("All books available to rent: " + bookToRent.size());
                 for (Book book : bookToRent) {
                     out.println("Id: " + book.getId() + " Title: " + book.getTitle() + " Author: " + book.getAuthor());
@@ -110,19 +110,19 @@ public class UserMenu extends ClientMenu {
                 out.println("Enter the bookID of the book you want to rent: ");
                 int bookID = Integer.parseInt(in.readLine());
                 boolean response = bookRepository.rentBook(bookID, myUser.getUserID());
-                if(response) {
+                if (response) {
                     out.println("Book Rented");
-                }else{
-                    out.println("You can't book this book");
+                } else {
+                    out.println("You can't rent this book");
                 }
                 out.println("Enter anything to go back to your library");
                 in.readLine();
                 userActions();
             }
-        }catch (IOException e){
+        } catch (IOException e) {
             System.err.println("error while reading your input: " + e.getMessage());
             rentBookMenu();
-        }catch (NumberFormatException e) {
+        } catch (NumberFormatException e) {
             out.println("Please enter a valid number");
             rentBookMenu();
         }
@@ -130,15 +130,18 @@ public class UserMenu extends ClientMenu {
 
     private void returnBookMenu() {
         out.println("enter bookID: ");
-        try{
+        try {
             int bookID = Integer.parseInt(in.readLine());
             boolean response = bookRepository.returnBook(myUser.getUserID(), bookID);
-            if(response) {
+            if (response) {
                 out.println("Thank you for returning the book");
-            }else{
+            } else {
                 out.println("bookID not valid");
             }
-        }catch(NumberFormatException n){
+            out.println("Enter anything to go back to your library");
+            in.readLine();
+            userActions();
+        } catch (NumberFormatException n) {
             System.err.println("you entered an invalid number enter a valid number");
             returnBookMenu();
         } catch (IOException e) {
