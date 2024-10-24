@@ -115,8 +115,12 @@ public class AdminMenu extends ClientMenu {
     private void seeBooksMenu() {
         out.println("== Library == ");
         List<Book> bookList = bookRepository.getAllBooks();
-        for (Book book : bookList) {
-            out.println("Title: " + book.getTitle() + " id: " + book.getId());
+        if(!bookList.isEmpty()) {
+            for (Book book : bookList) {
+                out.println("Title: " + book.getTitle() + " id: " + book.getId());
+            }
+        }else{
+            out.println("No books found");
         }
         out.println("Press anything to go back to admin menu");
         try {
@@ -268,6 +272,9 @@ public class AdminMenu extends ClientMenu {
                     break;
                 case "6":
                     displayMenu();
+                    break;
+                default:
+                    manageUsers();
                     break;
             }
         } catch (IOException e) {
