@@ -1,8 +1,6 @@
 package com.library.management.menu;
 
 import com.library.management.books.Book;
-import com.library.management.database.BookRepository;
-import com.library.management.database.UserRepository;
 import com.library.management.users.User;
 
 import java.io.IOException;
@@ -11,13 +9,9 @@ import java.sql.Connection;
 import java.util.List;
 
 public class AdminMenu extends ClientMenu {
-    BookRepository bookRepository;
-    UserRepository userRepository;
 
-    public AdminMenu(User user, Socket socket, Connection connection) {
+    public AdminMenu(Socket socket, Connection connection) {
         super(socket, connection);
-        bookRepository = new BookRepository(connection);
-        userRepository = new UserRepository(connection);
     }
 
     @Override
@@ -79,6 +73,16 @@ public class AdminMenu extends ClientMenu {
             }
         } catch (IOException e) {
             System.err.println("Error while reading from input in addBookMenu. " + e.getMessage());
+        }catch(IllegalArgumentException e) {
+            out.println("Date must be in this format: YYYY-MM-DD");
+            out.println("Press anything to re enter book data");
+            try {
+                in.readLine();
+                addBookMenu();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
         }
     }
 
