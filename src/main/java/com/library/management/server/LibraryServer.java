@@ -28,7 +28,6 @@ public class LibraryServer{
     }
 
     public void start() {
-        ClientHandler clientHandler;
         try {
             DatabaseConnection databaseConnection = new DatabaseConnection();
             this.connection = databaseConnection.getConnection();
@@ -40,7 +39,7 @@ public class LibraryServer{
                 System.out.println("[SERVER] new client connected");
                 // starting a new thread
 //                clientHandler = new ClientHandler(clientSocket, this.databaseConnection);
-                clientHandler = new ClientHandler(clientSocket, connection);
+                ClientHandler clientHandler = new ClientHandler(clientSocket, connection);
                 this.clientHandlers.add(clientHandler);
                 clientHandler.start();
             }
@@ -70,9 +69,12 @@ public class LibraryServer{
         } catch (IOException e) {
             System.err.println("[SERVER] could not close server socket");
         }
-//        catch (SQLException e) {
-//            System.err.println("[SERVER] error closing connection with database");
-//        }
+    }
+
+
+    public static void main(String[] args) {
+        LibraryServer server = new LibraryServer();
+        server.start();
     }
 
 }

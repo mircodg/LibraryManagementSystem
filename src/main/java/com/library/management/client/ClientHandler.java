@@ -44,7 +44,7 @@ public class ClientHandler extends Thread {
     public void listen(){
         try {
             String request;
-            while (!(request = in.readLine()).equals("[CLIENT] /exit") || ((request = in.readLine()) != null)) {
+            while (!(request = in.readLine()).equals("/exit") || ((request = in.readLine()) != null)) {
                 System.out.println(request);
             }
             System.out.println("[SERVER] client socket closed");
@@ -59,14 +59,12 @@ public class ClientHandler extends Thread {
     public void run() {
 //      this.listen();
         // thread that handles menu. This way the server listen and sends data concurrently.
-        System.out.println("[SERVER] client thread started. Displaying Menu");
+        System.out.println("[SERVER] client thread started");
         ClientMenu menu = new ClientMenu(this.socket, this.connection);
         try {
             menu.displayMenu();
         } catch (IOException e) {
-            System.err.println("[SERVER] error while displaying menu for the client: " + e.getMessage());
             this.closeAll();
-            throw new RuntimeException(e);
         }
     }
 }

@@ -1,4 +1,5 @@
 package com.library.management.client;
+
 import com.library.management.utils.Utils;
 
 import java.io.*;
@@ -23,72 +24,67 @@ public class Client {
     }
 
     public void closeAll() {
-        try{
-            if(socket != null) {
+        try {
+            if (socket != null) {
                 socket.close();
             }
-            if(in != null) {
+            if (in != null) {
                 in.close();
             }
-            if(out != null) {
+            if (out != null) {
                 out.close();
             }
             System.out.println("[CLIENT] connection closed, exiting...");
             System.exit(0);
-        }catch(IOException e){
+        } catch (IOException e) {
             System.err.println("[CLIENT] error while closing connection");
         }
     }
 
-    public void sendMessage(){
+    public void sendMessage() {
         Scanner scanner = new Scanner(System.in);
-        while(socket.isConnected()){
+        while (!socket.isClosed()) {
             String messageToSend = scanner.nextLine();
             out.println(messageToSend);
-            if(messageToSend.equals("/exit")){
+            if (messageToSend.equals("/exit")) {
                 this.closeAll();
                 System.out.println("[CLIENT] closed socket and exiting");
             }
         }
     }
 
-    public void listen(){
+    public void listen() throws IOException {
         new Thread(new Runnable() {
             @Override
-            public void run() {
-                while(running){
-                    try{
-                        String receivedMessage;
-                        if((receivedMessage = in.readLine()) == null){
-                            running = false;
-                            System.out.println("[SERVER] shutting down");
-                            System.exit(0);
-                        }else{
-                            if(receivedMessage.equals("/clear")){
-                                Utils.clearScreen();
-                            }
-                            else{
-                                System.out.println(receivedMessage);
-                            }
-                        }
+            public void run(){
+                while (!socket.isClosed()) {
+                    String receivedMessage = null;
+                    try {
+                        receivedMessage = in.readLine();
                     } catch (IOException e) {
-                        System.err.println("[SERVER] error while reading from socket: " + e.getMessage());
+                        closeAll();
+                    }
+                    assert receivedMessage != null;
+                    if (receivedMessage.equals("/clear")) {
+                        Utils.clearScreen();
+                    } else {
+                        System.out.println(receivedMessage);
                     }
                 }
             }
         }).start();
     }
 
-    public static void main(String[] args) {
-        Client client;
-        try {
-            Socket socket = new Socket("localhost", 8000);
-            client = new Client(socket);
-            client.listen();
-            client.sendMessage();
-        } catch (IOException e) {
-            System.err.println("[CLIENT] server not available");
-        }
+public static void main(String[] args) {
+    Client client;
+    try {
+        Socket socket = new Socket("localhost", 8000);
+        client = new Client(socket);
+        client.listen();
+        client.sendMessage();
+    } catch (IOException e) {
+        System.err.println("[CLIENT] server not available");
     }
+}
 
 }
