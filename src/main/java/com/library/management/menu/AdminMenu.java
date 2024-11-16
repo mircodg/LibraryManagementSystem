@@ -10,47 +10,45 @@ import java.util.List;
 
 public class AdminMenu extends ClientMenu {
 
-    public AdminMenu(Socket socket, Connection connection) {
+    public AdminMenu(Socket socket, Connection connection) throws IOException {
         super(socket, connection);
     }
 
     @Override
-    public void displayMenu() {
+    public void displayMenu() throws IOException{
         out.println("== Management System Admin Menu ==");
         out.println("1. Add Book\n2. Delete Book\n3. See books\n4. See book\n5. Manage Users\n6. Exit");
-        try {
-            String choice = in.readLine();
-            switch (choice) {
-                case "1":
-                    addBookMenu();
-                    break;
-                case "2":
-                    deleteBookMenu();
-                    break;
-                case "3":
-                    seeBooksMenu();
-                    break;
-                case "4":
-                    seeBookMenu();
-                    break;
-                case "5":
-                    manageUsers();
-                    break;
-                case "6":
-                    System.out.println("ok");
-                    break;
-                default:
-                    System.out.println("Invalid choice");
-                    displayMenu();
-                    break;
-            }
-        } catch (IOException e) {
-            System.err.println("Error while reading from input. " + e.getMessage());
+        String choice = in.readLine();
+        switch (choice) {
+            case "1":
+                addBookMenu();
+                break;
+            case "2":
+                deleteBookMenu();
+                break;
+            case "3":
+                seeBooksMenu();
+                break;
+            case "4":
+                seeBookMenu();
+                break;
+            case "5":
+                manageUsers();
+                break;
+            case "6":
+                out.println("Goodbye !");
+                out.println("/exit");
+                break;
+            default:
+                System.out.println("Invalid choice");
+                displayMenu();
+                break;
         }
+
     }
 
 
-    private void addBookMenu() {
+    private void addBookMenu() throws IOException {
         // send command to clear screen
         try {
             out.println("title: ");
@@ -71,22 +69,15 @@ public class AdminMenu extends ClientMenu {
                 in.readLine();
                 displayMenu();
             }
-        } catch (IOException e) {
-            System.err.println("Error while reading from input in addBookMenu. " + e.getMessage());
-        }catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             out.println("Date must be in this format: YYYY-MM-DD");
             out.println("Press anything to re enter book data");
-            try {
-                in.readLine();
-                addBookMenu();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-
+            in.readLine();
+            addBookMenu();
         }
     }
 
-    private void deleteBookMenu() {
+    private void deleteBookMenu() throws IOException {
         // clear screen
         out.println();
         out.println("Enter the ID of the book to be deleted: ");
@@ -95,191 +86,171 @@ public class AdminMenu extends ClientMenu {
             boolean response = bookRepository.deleteBook(id);
             if (response) {
                 out.println("Book deleted successfully");
-                out.println("Press anything to go back to admin menu");
-                in.readLine();
-                displayMenu();
             } else {
                 out.println("Book not found");
-                out.println("Press anything to go back to admin menu");
-                in.readLine();
-                displayMenu();
             }
-        } catch (IOException e) {
-            System.err.println("Error while reading from input in deleteBookMenu. " + e.getMessage());
+            out.println("Press anything to go back to admin menu");
+            in.readLine();
+            displayMenu();
         } catch (NumberFormatException e) {
             System.err.println("Invalid ID");
             deleteBookMenu();
         }
     }
 
-    private void seeBooksMenu() {
+    private void seeBooksMenu() throws IOException {
         out.println("== Library == ");
         List<Book> bookList = bookRepository.getAllBooks();
-        if(!bookList.isEmpty()) {
+        if (!bookList.isEmpty()) {
             for (Book book : bookList) {
                 out.println("Title: " + book.getTitle() + " id: " + book.getId());
             }
-        }else{
+        } else {
             out.println("No books found");
         }
         out.println("Press anything to go back to admin menu");
-        try {
-            in.readLine();
-            displayMenu();
-        } catch (IOException e) {
-            System.err.println("Error while reading from input in seeBooksMenu. " + e.getMessage());
-        }
+        in.readLine();
+        displayMenu();
     }
 
-    private void seeBookMenu() {
+    private void seeBookMenu() throws IOException {
         out.println("1. Search by title\n2. Search by id\n3. Go back to admin menu");
-        try {
-            String choice = in.readLine();
-            switch (choice) {
-                case "1":
-                    out.println("Enter title: ");
-                    String title = in.readLine();
-                    Book retriviedBook = bookRepository.getBookByTitle(title);
-                    if (retriviedBook != null) {
-                        displayBookInfo(retriviedBook);
-                    } else {
-                        out.println("Book not found");
-                    }
-                    out.println("type something to go back to admin menu");
-                    in.readLine();
-                    displayMenu();
-                    break;
-                case "2":
-                    out.println("Enter id: ");
-                    int id = Integer.parseInt(in.readLine());
-                    Book retrievedBook = bookRepository.getBookById(id);
-                    if (retrievedBook != null) {
-                        displayBookInfo(retrievedBook);
-                    } else {
-                        out.println("Book not found");
-                    }
-                    out.println("Press anything to go back to admin menu");
-                    in.readLine();
-                    displayMenu();
-                    break;
-                default:
-                    seeBookMenu();
-            }
-        } catch (IOException e) {
-            System.err.println("Error while reading from input. " + e.getMessage());
+        String choice = in.readLine();
+        switch (choice) {
+            case "1":
+                out.println("Enter title: ");
+                String title = in.readLine();
+                Book retriviedBook = bookRepository.getBookByTitle(title);
+                if (retriviedBook != null) {
+                    displayBookInfo(retriviedBook);
+                } else {
+                    out.println("Book not found");
+                }
+                out.println("type something to go back to admin menu");
+                in.readLine();
+                displayMenu();
+                break;
+            case "2":
+                out.println("Enter id: ");
+                int id = Integer.parseInt(in.readLine());
+                Book retrievedBook = bookRepository.getBookById(id);
+                if (retrievedBook != null) {
+                    displayBookInfo(retrievedBook);
+                } else {
+                    out.println("Book not found");
+                }
+                out.println("Press anything to go back to admin menu");
+                in.readLine();
+                displayMenu();
+                break;
+            default:
+                seeBookMenu();
         }
 
     }
 
-    private void manageUsers() {
+    private void manageUsers() throws IOException {
         out.println("== Users management menu ==");
         out.println("1. See users list\n2. See user info by ID\n3. See user info by username\n4. Delete user by ID\n5. Delete user by username\n6. Go back to admin menu");
-        try {
-            String choice = in.readLine();
-            switch (choice) {
-                case "1":
-                    List<User> userList = userRepository.getUsers();
-                    if (!userList.isEmpty()) {
-                        for (User user : userList) {
-                            out.println("ID: " +  user.getUserID());
-                            out.println("Username: " +  user.getUsername());
-                            out.println();
-                            out.println("Press anything to go back to user management menu");
-                            in.readLine();
-                            manageUsers();
-                        }
-                    } else {
-                        out.println("No users found");
+        String choice = in.readLine();
+        switch (choice) {
+            case "1":
+                List<User> userList = userRepository.getUsers();
+                if (!userList.isEmpty()) {
+                    for (User user : userList) {
+                        out.println("ID: " + user.getUserID());
+                        out.println("Username: " + user.getUsername());
                         out.println();
+                    }
                         out.println("Press anything to go back to user management menu");
                         in.readLine();
                         manageUsers();
+                } else {
+                    out.println("No users found");
+                    out.println();
+                    out.println("Press anything to go back to user management menu");
+                    in.readLine();
+                    manageUsers();
+                }
+                break;
+            case "2":
+                out.println("Enter id: ");
+                try {
+                    int id = Integer.parseInt(in.readLine());
+                    User myUser = userRepository.getUser(id);
+                    if (myUser != null) {
+                        displayUser(myUser);
+                    } else {
+                        out.println("User not found");
                     }
-                    break;
-                case "2":
-                    out.println("Enter id: ");
-                    try {
-                        int id = Integer.parseInt(in.readLine());
-                        User myUser = userRepository.getUser(id);
-                        if (myUser != null) {
-                            displayUser(myUser);
-                        }else{
-                            out.println("User not found");
-                        }
-                        out.println("Press anything to go back to user management menu");
-                        in.readLine();
-                        manageUsers();
-                    } catch (NumberFormatException e) {
-                        out.println("Invalid ID");
-                        manageUsers();
-                    }
-                    break;
-                case "3":
-                    out.println("Enter username: ");
-                    try {
-                        String username = in.readLine();
-                        User myUser = userRepository.getUser(username);
-                        if (myUser != null) {
-                            displayUser(myUser);
-                            out.println("Press anything to go back to user management menu");
-                            in.readLine();
-                            manageUsers();
-                        }else {
-                            out.println("User not found");
-                            out.println("Press anything to go back to user management menu");
-                            in.readLine();
-                            manageUsers();
-                        }
-                    } catch (IOException e) {
-                        System.err.println("Error while reading from input. " + e.getMessage());
-                    }
-                    break;
-                case "4":
-                    out.println("Enter id: ");
-                    try {
-                        int id = Integer.parseInt(in.readLine());
+                    out.println("Press anything to go back to user management menu");
+                    in.readLine();
+                    manageUsers();
+                } catch (NumberFormatException e) {
+                    out.println("Invalid ID");
+                    manageUsers();
+                }
+                break;
+            case "3":
+                out.println("Enter username: ");
+                String username = in.readLine();
+                User myUser = userRepository.getUser(username);
+                if (myUser != null) {
+                    displayUser(myUser);
+                } else {
+                    out.println("User not found");
+                }
+
+                out.println("Press anything to go back to user management menu");
+                in.readLine();
+                manageUsers();
+                break;
+            case "4":
+                out.println("Enter id: ");
+                try {
+                    int id = Integer.parseInt(in.readLine());
+                    if (id != 1) {
                         boolean isDelited = userRepository.deleteUser(id);
                         if (isDelited) {
                             out.println("User successfully deleted");
-                        }else{
+                        } else {
                             out.println("User not found");
                         }
-                        out.println("Press anything to go back to user management menu");
-                        in.readLine();
-                        manageUsers();
-                    } catch (NumberFormatException e) {
-                        out.println("Invalid ID");
-                        manageUsers();
+                    } else {
+                        out.println("You can't delete this user");
                     }
-                    break;
-                case "5":
-                    out.println("Enter username: ");
-                    try {
-                        String username = in.readLine();
-                        boolean isDelited = userRepository.deleteUser(username);
-                        if (isDelited) {
-                            out.println("User successfully deleted");
-                        }else{
-                            out.println("User not found");
-                        }
-                        out.println("Press anything to go back to user management menu");
-                        in.readLine();
-                        manageUsers();
-                    } catch (IOException e) {
-                        out.println("error while reading from input. ");
-                        manageUsers();
-                    }
-                    break;
-                case "6":
-                    displayMenu();
-                    break;
-                default:
+                    out.println("Press anything to go back to user management menu");
+                    in.readLine();
                     manageUsers();
-                    break;
-            }
-        } catch (IOException e) {
-            System.err.println("Error while reading from input in manage users. " + e.getMessage());
+                } catch (NumberFormatException e) {
+                    out.println("Invalid ID");
+                    manageUsers();
+                }
+                break;
+            case "5":
+                out.println("Enter username: ");
+                String username2 = in.readLine();
+                if(!username2.equalsIgnoreCase("admin")) {
+                    boolean isDelited = userRepository.deleteUser(username2);
+                    if (isDelited) {
+                        out.println("User successfully deleted");
+                    } else {
+                        out.println("User not found");
+                    }
+                }else{
+                    out.println("You can't delete this user");
+                }
+                out.println("Press anything to go back to user management menu");
+                in.readLine();
+                manageUsers();
+                break;
+            case "6":
+                displayMenu();
+            default:
+                manageUsers();
+                break;
         }
+
     }
 
     public void displayBookInfo(Book book) {
@@ -302,7 +273,7 @@ public class AdminMenu extends ClientMenu {
             for (Book book : bookList) {
                 out.println("Title: " + book.getTitle());
             }
-        }else{
+        } else {
             out.println("No books rented yet");
         }
     }

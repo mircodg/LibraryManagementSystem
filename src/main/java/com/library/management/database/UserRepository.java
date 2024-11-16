@@ -73,14 +73,14 @@ public User getUserByCredentials(String username, String password) {
 
 public List<User> getUsers() {
     try {
-        String query = "SELECT * FROM users WHERE role= ?";
+        String query = "SELECT * FROM users WHERE role='user'";
         PreparedStatement preparedStatement = connection.prepareStatement(query);
-        preparedStatement.setString(1, "user");
         ResultSet rs = preparedStatement.executeQuery();
         List<User> users = new ArrayList<>();
         while (rs.next()) {
             users.add(new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role")));
         }
+
         return users;
     } catch (SQLException e) {
         System.err.println("error while retrieving users: " + e.getMessage());

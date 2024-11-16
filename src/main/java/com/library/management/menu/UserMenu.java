@@ -11,7 +11,7 @@ import java.util.List;
 public class UserMenu extends ClientMenu {
     User myUser;
 
-    public UserMenu(Socket socket, Connection connection, String username, String password) {
+    public UserMenu(Socket socket, Connection connection, String username, String password) throws IOException {
         super(socket, connection);
         myUser = new User(username, password);
         updateUserLocally(myUser);
@@ -23,6 +23,7 @@ public class UserMenu extends ClientMenu {
         if (myUser.getFirstName() == null) {
             // using attributes of father class
             try {
+                out.println("/clear");
                 out.println("Let me know more about yourself");
                 out.println("Enter your first name: ");
                 String firstName = in.readLine();
@@ -35,7 +36,6 @@ public class UserMenu extends ClientMenu {
                     out.println("Thank you, you're information have been saved");
                     out.println("enter anything to go to your library");
                     in.readLine();
-//                    out.println("/clear");
                     userActions();
                 } else {
                     out.println("Something went wrong while saving the user");
@@ -51,6 +51,7 @@ public class UserMenu extends ClientMenu {
     }
 
     private void userActions() {
+        out.println("/clear");
         out.println(myUser.getFirstName().toUpperCase() + "'s Library");
         out.println("1. See rented books\n2. Rent a book\n3. Return a book\n4. Exit\nChoice: ");
 //        out.flush(); // this because out.print() don't get automatically flushed.
@@ -67,7 +68,8 @@ public class UserMenu extends ClientMenu {
                     returnBookMenu();
                     break;
                 case 4:
-                    // exit logic
+                    out.println("Thank you for using our system, see you soon !");
+                    out.println("/exit");
                     break;
             }
 

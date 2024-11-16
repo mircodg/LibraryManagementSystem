@@ -4,13 +4,13 @@ import com.library.management.utils.Utils;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Scanner;
 
 public class Client {
     private final Socket socket;
     private BufferedReader in;
     private PrintWriter out;
-    private boolean running = true;
 
     public Client(Socket socket) {
         this.socket = socket;
@@ -34,7 +34,6 @@ public class Client {
             if (out != null) {
                 out.close();
             }
-            System.out.println("[CLIENT] connection closed, exiting...");
             System.exit(0);
         } catch (IOException e) {
             System.err.println("[CLIENT] error while closing connection");
@@ -53,38 +52,75 @@ public class Client {
         }
     }
 
-    public void listen() throws IOException {
-        new Thread(new Runnable() {
-            @Override
-            public void run(){
-                while (!socket.isClosed()) {
-                    String receivedMessage = null;
-                    try {
-                        receivedMessage = in.readLine();
-                    } catch (IOException e) {
-                        closeAll();
-                    }
-                    assert receivedMessage != null;
-                    if (receivedMessage.equals("/clear")) {
-                        Utils.clearScreen();
-                    } else {
-                        System.out.println(receivedMessage);
+//    public void listen() throws IOException {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run(){
+//                while (!socket.isClosed()) {
+//                    String receivedMessage = "";
+//                    try {
+//                        receivedMessage = in.readLine();
+//                    } catch (IOException e) {
+//                        closeAll();
+//                    }
+//                    if (receivedMessage.equals("/clear")) {
+//                        Utils.clearScreen();
+//                    } else  if (receivedMessage.equals("null")){
+//                        System.out.println("Server closed the connection");
+//                        closeAll();
+//                    }
+//                    else{
+//                        System.out.println(receivedMessage);
+//                    }
+//                }
+//            }
+//        }).start();
+//    }
+        public void listen() throws IOException {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!socket.isClosed()) {
+                        String receivedMessage;
+                        try {
+                            receivedMessage = in.readLine();
+                            if (receivedMessage == null) {
+                                System.out.println("Server closed the connection");
+                                closeAll();
+                                break;
+                            }
+                        } catch (SocketException e) {
+                            System.out.println("SocketException: Server might have closed the connection");
+                            closeAll();
+                            break;
+                        } catch (IOException e) {
+                            System.out.println("IOException occurred: " + e.getMessage());
+                            closeAll();
+                            break;
+                        }
+                        if ("/clear".equals(receivedMessage)) {
+                            Utils.clearScreen();
+                        }else if("/exit".equals(receivedMessage)) {
+                            closeAll();
+                            System.exit(0);
+                        } else {
+                            System.out.println(receivedMessage);
+                        }
                     }
                 }
-            }
-        }).start();
-    }
+            }).start();
+        }
 
-public static void main(String[] args) {
-    Client client;
-    try {
-        Socket socket = new Socket("localhost", 8000);
-        client = new Client(socket);
-        client.listen();
-        client.sendMessage();
-    } catch (IOException e) {
-        System.err.println("[CLIENT] server not available");
+
+    public static void main(String[] args) {
+        try {
+            Socket socket = new Socket("localhost", 8000);
+            Client client = new Client(socket);
+            client.listen();
+            client.sendMessage();
+        } catch (IOException e) {
+            System.err.println("[CLIENT] server not available");
+        }
     }
-}
 
 }

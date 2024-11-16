@@ -1,6 +1,4 @@
 package com.library.management.client;
-
-import com.library.management.database.DatabaseConnection;
 import com.library.management.menu.ClientMenu;
 
 import java.io.*;
@@ -41,29 +39,31 @@ public class ClientHandler extends Thread {
         }
     }
 
-    public void listen(){
-        try {
-            String request;
-            while (!(request = in.readLine()).equals("/exit") || ((request = in.readLine()) != null)) {
-                System.out.println(request);
-            }
-            System.out.println("[SERVER] client socket closed");
-            this.closeAll();
-        } catch (IOException e) {
-            System.err.println("[SERVER] error while reading socket for the client: " + e);
-            this.closeAll();
-        }
+    public Socket getSocket(){
+        return socket;
     }
+
+//    public void listen(){
+//        try {
+//            String request;
+//            while (!(request = in.readLine()).equals("/exit") || ((request = in.readLine()) != null)) {
+//                System.out.println(request);
+//            }
+//            System.out.println("[SERVER] client socket closed");
+//            this.closeAll();
+//        } catch (IOException e) {
+//            System.err.println("[SERVER] error while reading socket for the client: " + e);
+//            this.closeAll();
+//        }
+//    }
 
     @Override
     public void run() {
-//      this.listen();
-        // thread that handles menu. This way the server listen and sends data concurrently.
         System.out.println("[SERVER] client thread started");
-        ClientMenu menu = new ClientMenu(this.socket, this.connection);
         try {
-            menu.displayMenu();
-        } catch (IOException e) {
+            ClientMenu clientMenu = new ClientMenu(this.socket, this.connection);
+            clientMenu.displayMenu();
+        } catch (IOException | NullPointerException e) {
             this.closeAll();
         }
     }

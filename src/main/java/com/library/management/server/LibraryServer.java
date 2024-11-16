@@ -11,9 +11,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class LibraryServer{
+public class LibraryServer {
     private ServerSocket serverSocket;
-    private Connection connection;
+    Connection connection; // single connection with the database shared among client threads.
     private final ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
 
 
@@ -22,8 +22,9 @@ public class LibraryServer{
         try {
             this.serverSocket = new ServerSocket(configParser.getServerPort());
             System.out.println("[SERVER] port allocated");
-        }catch(IOException e){
+        } catch (IOException e) {
             System.err.println("[SERVER] could not use port: " + configParser.getServerPort());
+            System.exit(1);
         }
     }
 
@@ -33,7 +34,7 @@ public class LibraryServer{
             this.connection = databaseConnection.getConnection();
             System.out.println("[SERVER] connected to database ");
             System.out.println("[SERVER] listening on port " + serverSocket.getLocalPort());
-            while(!this.serverSocket.isClosed()) {
+            while (!serverSocket.isClosed()) {
                 // listening for clients
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("[SERVER] new client connected");
@@ -46,28 +47,38 @@ public class LibraryServer{
         } catch (IOException e) {
             System.err.println("[SERVER] could not accept connection");
             this.stop();
-            throw new RuntimeException(e.getMessage());
         }catch (SQLException e) {
             System.err.println("[SERVER] could not connect to database");
+            System.err.println("[SERVER] " + e.getMessage());
             this.stop();
         }
     }
 
     public void stop() {
         try {
-            if(this.serverSocket != null) {
-                // closing every client socket
-                for(ClientHandler clientHandler : this.clientHandlers) {
-                    clientHandler.closeAll();
+            if (this.serverSocket != null) {
+                // closing every client socket still open
+                for (ClientHandler clientHandler : this.clientHandlers) {
+                    if (clientHandler.getSocket() != null) {
+                        clientHandler.closeAll();
+                    }
                 }
-                // closing server socket
-                this.serverSocket.close();
-//                this.databaseConnection.disconnect();
+                // closing server socket and db connection
+                if (this.connection != null) {
+                    connection.close();
+                }
+                if (this.serverSocket != null) {
+                    this.serverSocket.close();
+                }
                 System.out.println("[SERVER] server socket and db connection closed");
+                // exit
+                System.exit(0);
             }
             System.out.println("[SERVER] exiting");
         } catch (IOException e) {
-            System.err.println("[SERVER] could not close server socket");
+            System.err.println("[SERVER] could not close server socket " + e.getMessage());
+        }catch(SQLException sqlException){
+            System.err.println("[SERVER] could not close database connection " + sqlException.getMessage());
         }
     }
 
