@@ -1,5 +1,5 @@
 package com.library.management.client;
-import com.library.management.menu.ClientMenuV2;
+import com.library.management.menu.ClientMenu;
 
 import java.io.*;
 import java.net.Socket;
@@ -61,7 +61,7 @@ public class ClientHandler extends Thread {
     public void run() {
         System.out.println("[SERVER] client thread started");
         try {
-            ClientMenuV2 clientMenu = new ClientMenuV2(this.connection, this.socket);
+            ClientMenu clientMenu = new ClientMenu(this.connection, this.socket);
             clientMenu.displayMenu();
         } catch (IOException | NullPointerException e) {
             this.closeAll();
