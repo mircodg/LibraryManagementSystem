@@ -1,5 +1,6 @@
 package com.library.management.client;
 
+import com.library.management.utils.ConfigParser;
 import com.library.management.utils.Utils;
 
 import java.io.*;
@@ -114,7 +115,8 @@ public class Client {
 
     public static void main(String[] args) {
         try {
-            Socket socket = new Socket("localhost", 8000);
+            ConfigParser configParser = new ConfigParser();
+            Socket socket = new Socket(configParser.getHost(), configParser.getServerPort());
             Client client = new Client(socket);
             client.listen();
             client.sendMessage();
