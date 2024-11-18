@@ -9,9 +9,9 @@ import java.sql.Connection;
 import java.util.List;
 
 
-public class AdminMenuV2 extends BaseMenu {
+public class AdminMenu extends BaseMenu {
 
-    public AdminMenuV2(Socket socket, Connection connection) throws IOException {
+    public AdminMenu(Socket socket, Connection connection) throws IOException {
         super(socket, connection);
     }
 
