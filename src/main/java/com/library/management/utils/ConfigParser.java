@@ -13,6 +13,7 @@ public class ConfigParser {
     private String dbUrl;
     private String dbUsername;
     private String dbPass;
+    private String host;
     private int serverPort;
 
     public ConfigParser(){
@@ -29,6 +30,7 @@ public class ConfigParser {
             this.dbPass = dbConfig.getElementsByTagName("password").item(0).getTextContent();
 
             Element serverConfig = (Element) doc.getElementsByTagName("server").item(0);
+            this.host = serverConfig.getElementsByTagName("host").item(0).getTextContent();
             this.serverPort = Integer.parseInt(serverConfig.getElementsByTagName("port").item(0).getTextContent());
         }catch (FileNotFoundException e){
             System.err.println("File not found");
@@ -54,5 +56,6 @@ public class ConfigParser {
         return dbPass;
     }
 
+    public String getHost() {return host;}
 
 }
