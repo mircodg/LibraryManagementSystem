@@ -9,10 +9,10 @@ import java.sql.Connection;
 import java.util.List;
 
 
-public class UserMenuV2 extends BaseMenu {
+public class UserMenu extends BaseMenu {
     User myUser;
 
-    public UserMenuV2(Socket socket, Connection connection, String username, String password) throws IOException {
+    public UserMenu(Socket socket, Connection connection, String username, String password) throws IOException {
         super(socket, connection);
         myUser = new User(username, password);
         updateUserLocally(myUser);
@@ -48,9 +48,11 @@ public class UserMenuV2 extends BaseMenu {
     private void showRentedBooks() throws IOException {
         List<Book> rentedBooks = bookRepository.getUserBooks(myUser.getUserID());
         if (rentedBooks.isEmpty()) {
+            out.println();
             out.println("No books rented yet");
         }
         for (Book book : rentedBooks) {
+            out.println();
             out.println("Id: " + book.getId());
             out.println("Title: " + book.getTitle());
         }
@@ -61,23 +63,29 @@ public class UserMenuV2 extends BaseMenu {
         List<Book> bookToRent = bookRepository.getAvailableBooks();
 
         if (bookToRent.isEmpty()) {
+            out.println();
             out.println("No books to rent");
         } else {
+            out.println();
             out.println("All books available to rent: " + bookToRent.size());
+            out.println();
             for (Book book : bookToRent) {
-                out.println("Id: " + book.getId() + " Title: " + book.getTitle() + " Author: " + book.getAuthor());
+                out.println("Id: " + book.getId() + " | Title: " + book.getTitle() + " | Author: " + book.getAuthor());
+                out.println();
             }
             out.println("Enter the bookID of the book you want to rent: ");
             try {
-
                 int bookID = Integer.parseInt(readInput());
                 boolean response = bookRepository.rentBook(bookID, myUser.getUserID());
                 if (response) {
+                    out.println();
                     out.println("Book Rented");
                 } else {
+                    out.println();
                     out.println("You can't rent this book");
                 }
             } catch (NumberFormatException e) {
+                out.println();
                 out.println("bookID not valid");
             } finally {
                 waitAndReturn();
@@ -87,16 +95,20 @@ public class UserMenuV2 extends BaseMenu {
     }
 
     private void returnBook() throws IOException {
+        out.println();
         out.println("enter bookID: ");
         try {
             int bookID = Integer.parseInt(readInput());
             boolean response = bookRepository.returnBook(myUser.getUserID(), bookID);
             if (response) {
+                out.println();
                 out.println("Thank you for returning the book");
             } else {
+                out.println();
                 out.println("bookID not valid");
             }
         } catch (NumberFormatException e) {
+            out.println();
             out.println("bookID not valid");
         } finally {
             waitAndReturn();
