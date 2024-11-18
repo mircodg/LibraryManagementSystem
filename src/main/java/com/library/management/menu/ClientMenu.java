@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.net.Socket;
 
-public class ClientMenuV2 extends BaseMenu {
+public class ClientMenu extends BaseMenu {
 
-    public ClientMenuV2(Connection connection, Socket socket) throws IOException {
+    public ClientMenu(Connection connection, Socket socket) throws IOException {
         super(socket, connection);
     }
 
@@ -61,8 +61,8 @@ public class ClientMenuV2 extends BaseMenu {
         if (user != null) {
             out.println("Successfully logged in");
             BaseMenu nextMenu = user.getRole().equals("admin")
-                    ? new AdminMenuV2(socket, connection)
-                    : new UserMenuV2(socket, connection, username, password);
+                    ? new AdminMenu(socket, connection)
+                    : new UserMenu(socket, connection, username, password);
             nextMenu.displayMenu();
         } else {
             out.println("Invalid username or password");
@@ -82,7 +82,7 @@ public class ClientMenuV2 extends BaseMenu {
             boolean response = userRepository.addUser(username, password);
             if (response) {
                 out.println("Successfully registered");
-                new UserMenuV2(this.socket, connection, username, password).displayMenu();
+                new UserMenu(this.socket, connection, username, password).displayMenu();
             } else {
                 out.println("error while registering user");
                 waitAndReturn();
