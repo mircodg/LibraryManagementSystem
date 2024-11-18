@@ -6,6 +6,7 @@
         <password>mircodevpass</password>
     </database>
     <server>
+        <host>localhost</host>
         <port>8000</port>
     </server>
 </config>
