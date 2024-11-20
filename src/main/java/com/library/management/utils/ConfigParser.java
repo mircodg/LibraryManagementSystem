@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Paths;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -18,7 +19,9 @@ public class ConfigParser {
 
     public ConfigParser(){
         try {
-            File file = new File("src/main/java/com/library/management/config/config.xml");
+//          File myFile = new File("src/main/java/com/library/management/config/config.xml");
+            // using Paths.get for cross-platform file paths.
+            File file = Paths.get("src", "main", "java", "com", "library", "management", "config", "config.xml").toFile();
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(file);
