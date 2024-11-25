@@ -67,6 +67,7 @@ public class ClientMenu extends BaseMenu {
         } else {
             out.println("Invalid username or password");
             waitAndReturn();
+            clearScreen();
         }
     }
 
