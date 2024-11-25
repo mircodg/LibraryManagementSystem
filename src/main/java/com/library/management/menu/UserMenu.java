@@ -154,6 +154,7 @@ public class UserMenu extends BaseMenu {
                     clearScreen();
                     return;
                 default:
+                    showMenuOptions();
                     break;
             }
         }
