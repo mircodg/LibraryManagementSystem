@@ -61,7 +61,6 @@ public User getUserByCredentials(String username, String password) {
         statement.setString(1, username);
         ResultSet rs = statement.executeQuery();
         if (!rs.next() || !BCrypt.checkpw(password, rs.getString("password"))) {
-            System.err.println("User not found");
             return null;
         }
         return new User(rs.getInt("userID"), rs.getString("firstName"), rs.getString("lastName"), rs.getString("username"), rs.getString("password"), rs.getString("role"));
