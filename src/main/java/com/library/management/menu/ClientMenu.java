@@ -87,10 +87,12 @@ public class ClientMenu extends BaseMenu {
             } else {
                 out.println("error while registering user");
                 waitAndReturn();
+                clearScreen();
             }
         } else {
             out.println("username already taken by another user");
             waitAndReturn();
+            clearScreen();
         }
     }
 }
